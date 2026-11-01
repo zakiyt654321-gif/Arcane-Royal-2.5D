@@ -1,0 +1,322 @@
+ARCANE ROYALE ISLAND BLUEPRINT — OPTIMIZED PROCEDURAL MASTER PROMPT
+For Gemini AI Studio. Upload the original HTML and the reference image, then paste this entire prompt.
+==============================================================================
+
+PAGE 01 — 01 — ROLE, MISSION, AND SUCCESS CONDITION
+------------------------------------------------------------------------------
+You are a senior HTML5 Canvas game-engine programmer, mobile performance engineer, procedural environment artist, and collision-systems engineer. You are modifying the supplied Arcane Royale HTML file, not creating a new game. Read the complete source before editing. The target is a map overhaul inspired by the supplied Arcane Royale Island reference image: one compact island with a snowy northern mountain observatory, dense western forest, eastern ruined settlement, central moat-and-castle landmark, southwestern crystal quarry/arena, southeastern burning harbour settlement, beaches, paths, bridges, and surrounding sea.
+
+Your task is to implement this as a strictly procedural 2.5D environment using Canvas paths, rectangles, polygons, circles, and solid hexadecimal colors. Do not use external map images, downloaded textures, image URLs, sprite sheets, CSS backgrounds, data URIs, or generated image assets for the map. The result must remain compatible with the existing game loop, camera, 2.5D projection, player/bot systems, projectile system, loot, storm, and mobile touch gameplay.
+
+Success means: map geometry is understandable; terrain regions are static and distinct; all coordinates are in the existing 20,000 × 20,000 world; water and bridges behave correctly; obstacle collisions remain stable; the implementation is concise; and the existing Landscape UI is byte-for-byte untouched.
+
+
+==============================================================================
+
+PAGE 02 — 02 — SOURCE-OF-TRUTH AUDIT
+------------------------------------------------------------------------------
+Treat the uploaded HTML file as the sole source of truth for implementation details. The current engine declares ARENA_WIDTH = 20000 and ARENA_HEIGHT = 20000. It uses a 2D Canvas context named CTX, camera-space rendering through Camera.apply(CTX), CAMERA_PITCH = 0.88, INV_CAMERA_PITCH, and GRAVITY. Preserve those constants and their semantics.
+
+The current MAP_LAYOUT is a 36-entry array of positional numeric tuples [x, y, w, h]. The current obstaclePool is built by mapping every tuple into an obstacle and assigning a rotating preset from OBS_KEYS. The existing obstacle records use x, y, w, h, spriteKey, zHeight, colorTop, colorFront, colorSide, and rotation. Existing entity collision uses circle-versus-AABB resolution and allows jumping over an obstacle when entity.z >= obs.zHeight. Projectile collision also checks obstacle rectangles and projectile height.
+
+Do not assume a function, class, or data structure exists merely because it is common in other games. Search the source for every reference before changing a symbol. Preserve all public names used elsewhere or update every reference consistently.
+
+
+==============================================================================
+
+PAGE 03 — 03 — NON-NEGOTIABLE SCOPE BOUNDARIES
+------------------------------------------------------------------------------
+Only modify map-related code: map constants/data, ground rendering, map obstacle presets and pool construction, map obstacle drawing, water drawing, bridge drawing, and the minimal entity/projectile collision hooks required for water and bridges. Do not refactor unrelated systems.
+
+Do not edit or redesign the HTML structure, CSS, lobby, shop, HUD, settings, tutorial, loading screen, kill feed, action buttons, joystick, orientation prompt, Landscape UI, screen transitions, menus, text labels, fonts, or responsive layout. Do not change player statistics, weapons, spells, AI strategy, storm timing, loot rewards, currency, progression, audio, or save data.
+
+Do not replace the game with a new engine, framework, scene graph, tilemap library, WebGL renderer, physics engine, or external package. Do not add dependencies, imports, CDNs, build steps, server requirements, or installation steps. The final result must remain a single self-contained HTML file that runs in an Android browser.
+
+
+==============================================================================
+
+PAGE 04 — 04 — STRICT PROCEDURAL-ASSET POLICY
+------------------------------------------------------------------------------
+All new map visuals must be drawn at runtime from primitive Canvas geometry and hexadecimal colors. Each extruded structure must expose colorTop, colorFront, colorSide, and zHeight. Use additional hex colors for ground, water, shoreline, paths, vegetation accents, rock accents, lava/embers, and bridge planks.
+
+Do not create or reference ground_snow.webp, mountain_base.png, ground.webp, forest textures, castle images, harbour images, crystal images, bridge images, fog textures, decal images, or any other map image. Do not call drawImage for any map ground, map landmark, map obstacle, water, bridge, foliage, or terrain feature.
+
+The existing project may contain unrelated character or UI assets. Do not break those systems or delete assets needed by characters, portraits, or interface elements. The no-image rule applies to the redesigned map and its terrain/obstacle visuals. Remove the map's dependency on GROUND_IMG and any map obstacle/decal AssetLoader image fallback. Keep unrelated asset-loading code untouched.
+
+
+==============================================================================
+
+PAGE 05 — 05 — MOBILE PERFORMANCE BUDGET
+------------------------------------------------------------------------------
+Design for mobile first. Target 60 FPS on capable Android phones, but never claim that 60 FPS is guaranteed without profiling on real devices. The map must not allocate thousands of objects per frame, generate per-pixel terrain, build a 500 × 500 grid, or run biome blending for each tile.
+
+Use a small fixed set of large static rectangles for biome zones. Draw only zones that intersect the camera viewport. Use camera AABB culling before drawing detailed landmarks and obstacles. Keep the number of biome zones below 12, water rectangles exactly four for the castle moat, and bridge records below eight. Keep MAP_LAYOUT below 40 physical source lines and preferably below 20 data records.
+
+Avoid new per-frame arrays, object literals, closures, string concatenation, sorting, and repeated expensive Math.hypot calls in hot loops. Precompute static bounds and squared thresholds where practical. Use existing pools and existing frame timing. No new particle storms, thousands of decorative trees, or per-tile noise.
+
+
+==============================================================================
+
+PAGE 06 — 06 — WORLD COORDINATES AND AXIS CONVENTION
+------------------------------------------------------------------------------
+Use the existing world coordinate system without scaling or changing arena dimensions: origin (0, 0) is the top-left; positive X moves right/east; positive Y moves down/south. The playable world is [0, 20000] on both axes. Every rectangle is represented by its top-left x/y plus positive width/height.
+
+All map rectangles must satisfy x >= 0, y >= 0, w > 0, h > 0, x + w <= ARENA_WIDTH, and y + h <= ARENA_HEIGHT. Store geometry in world coordinates, never screen pixels. Do not use CSS coordinates for world geometry. Z-height is a visual/physics height in the existing world units and must not be confused with Y position.
+
+Do not place a giant castle rectangle inside a giant water rectangle. Do not use nested arrays as scene containers. The castle footprint, moat water rectangles, bridge overlays, biome zones, and solid obstacle footprints must be separate, explicit records with clear responsibilities.
+
+
+==============================================================================
+
+PAGE 07 — 07 — ISLAND COMPOSITION FROM THE REFERENCE
+------------------------------------------------------------------------------
+Recreate the reference image's broad composition, not its tiny visual details. North: high snow-covered mountain region with a summit observatory. Northwest: dark green forest with a few clearings and a winding path. Northeast: weathered stone ruins and a compact settlement. Center: a fortified castle on a central island, surrounded by a four-sided moat with four controlled bridge crossings. Southwest: excavated quarry with a circular crystal arena and sparse glowing crystal accents. Southeast: harbour settlement with docks, boats represented by simple polygons, and one scorched/burning district. South and coastal edges: beaches, grassland, rocks, and shoreline.
+
+Do not reproduce every tree, house, boat, or crystal as a separate map-layout record. Represent a forest as one or two terrain zones plus a capped number of lightweight procedural marks if needed. Represent a settlement as one zone and a few large building blocks. Keep landmarks readable from the normal camera zoom.
+
+
+==============================================================================
+
+PAGE 08 — 08 — BIOME ZONES: DISTINCT, STATIC, CHEAP
+------------------------------------------------------------------------------
+Create a small BIOME_ZONES array or equivalent static zone data. Use no more than nine large rectangular zones partitioning the island's landmass. Adjacent zone edges may touch but zone rectangles must not overlap one another. Each zone has id, biome, x, y, w, h, colorTop, colorFront, colorSide, and zHeight: 0. The zone is a ground-color region, not a collidable obstacle.
+
+Suggested palette: forest ground #28563A with darker accents #1C3F2C; snow #DCE7EF with shadow #9AAFC0; ruins #77766D with dark stone #4C4B49; meadow #71964A with shadow #496C35; quarry #77716B with dark rock #484541; harbour #806B52 with dark timber #493A32; beach #D8C28A; sea #0B2D48. Use only flat fills or a very small number of static polygon accents. No per-tile gradients or blending.
+
+Render zones as a handful of viewport-culled fillRect calls. If the island outline is needed, draw one static Canvas path/polygon over the sea base. Do not create a giant nested zone grid.
+
+
+==============================================================================
+
+PAGE 09 — 09 — MAP_LAYOUT DATA CONTRACT
+------------------------------------------------------------------------------
+Replace the positional tuple format with explicit objects, because the new map needs type, biome, solidity, and palette information. Preserve the exact variable name MAP_LAYOUT because other code may reference it. The array is a concise data declaration, not a list of thousands of generated props.
+
+Recommended fields: id, type, biome, x, y, w, h, zHeight, colorTop, colorFront, colorSide, solid, and optional rotation. Use type = 'zone' for non-colliding ground regions; type = 'landmark' for visual-only large structures; type = 'obstacle' for actual solid structures. Do not pass zone records into the entity obstacle collision loop.
+
+MAP_LAYOUT must contain fewer than 40 physical lines in the final source. Prefer one record per line. Keep it deterministic and readable. Do not generate repeated arrays at runtime from a large grid. Do not store children, nested props, or child obstacle lists inside a map record.
+
+
+==============================================================================
+
+PAGE 10 — 10 — RECOMMENDED MAP_LAYOUT ARRAY
+------------------------------------------------------------------------------
+Use this as the initial compact layout and adjust only if source inspection proves a coordinate conflict. The nine terrain zones form a non-overlapping 3 × 3 partition. The center zone is the keep grounds. The four castle wall records are independent solids; their openings are reserved for bridges/gates. Use separate WATER_LAYOUT and BRIDGE_LAYOUT arrays as specified later.
+
+const MAP_LAYOUT = [
+  {id:'forest_nw',type:'zone',biome:'forest',x:500,y:500,w:6000,h:6000,zHeight:0,colorTop:'#28563A',colorFront:'#1C3F2C',colorSide:'#142D20',solid:false},
+  {id:'snow_n',type:'zone',biome:'snow',x:6500,y:500,w:7000,h:6000,zHeight:0,colorTop:'#DCE7EF',colorFront:'#9AAFC0',colorSide:'#687D90',solid:false},
+  {id:'ruins_ne',type:'zone',biome:'ruins',x:13500,y:500,w:6000,h:6000,zHeight:0,colorTop:'#77766D',colorFront:'#4C4B49',colorSide:'#333331',solid:false},
+  {id:'meadow_w',type:'zone',biome:'meadow',x:500,y:6500,w:6000,h:7000,zHeight:0,colorTop:'#71964A',colorFront:'#496C35',colorSide:'#304A25',solid:false},
+  {id:'keep_center',type:'zone',biome:'meadow',x:6500,y:6500,w:7000,h:7000,zHeight:0,colorTop:'#668B45',colorFront:'#405E30',colorSide:'#2D4323',solid:false},
+  {id:'village_e',type:'zone',biome:'village',x:13500,y:6500,w:6000,h:7000,zHeight:0,colorTop:'#8B795D',colorFront:'#5A4939',colorSide:'#3E3329',solid:false},
+  {id:'quarry_sw',type:'zone',biome:'quarry',x:500,y:13500,w:6000,h:6000,zHeight:0,colorTop:'#77716B',colorFront:'#484541',colorSide:'#302E2B',solid:false},
+  {id:'meadow_s',type:'zone',biome:'meadow',x:6500,y:13500,w:7000,h:6000,zHeight:0,colorTop:'#71964A',colorFront:'#496C35',colorSide:'#304A25',solid:false},
+  {id:'harbour_se',type:'zone',biome:'harbour',x:13500,y:13500,w:6000,h:6000,zHeight:0,colorTop:'#806B52',colorFront:'#493A32',colorSide:'#30251F',solid:false},
+  {id:'castle_n_wall',type:'obstacle',biome:'castle',x:9000,y:9000,w:780,h:150,zHeight:95,colorTop:'#A9A7A0',colorFront:'#62616A',colorSide:'#41414B',solid:true},
+  {id:'castle_s_wall',type:'obstacle',biome:'castle',x:10220,y:11050,w:780,h:150,zHeight:95,colorTop:'#A9A7A0',colorFront:'#62616A',colorSide:'#41414B',solid:true}
+];
+
+The sample deliberately keeps the castle walls as separate footprints and leaves the gate gaps open. If you add wall segments, keep each segment an independent small rectangle. Do not add a single 2000 × 2000 collidable castle block.
+
+
+==============================================================================
+
+PAGE 11 — 11 — LANDMARKS WITHOUT COLLISION OVERLAP
+------------------------------------------------------------------------------
+Render major landmarks through a separate static landmark list or through type='landmark' records in MAP_LAYOUT. Visual landmarks must not automatically become solid collision rectangles. The northern observatory can be a compact stepped polygonal structure near the snow-zone summit. The eastern ruins can use a few rectangular columns and broken wall silhouettes. The quarry can use a circular arena ring with concentric polygonal outlines. The harbour can use small dock polygons and a limited number of boat silhouettes. The central keep can be drawn as a small group of procedural towers and walls.
+
+Keep landmarks visually grouped but do not represent them as one enormous collision box. If a landmark needs collision, create only the exact wall/rock footprints that block movement. The draw function may use a few Canvas paths per landmark, but must not create new arrays or objects every frame. Predefine coordinates and colors once.
+
+
+==============================================================================
+
+PAGE 12 — 12 — FOUR-RECTANGLE MOAT WATER LOGIC
+------------------------------------------------------------------------------
+The central castle moat MUST be represented by exactly four separate rectangular water blocks. Their center remains empty for the castle. Do not create one giant water rectangle around or underneath the castle. Use these coordinates as the baseline:
+
+const WATER_LAYOUT = [
+  {id:'moat_north',x:9000,y:8700,w:2000,h:300,color:'#176B91',edge:'#63C5D8',solid:true},
+  {id:'moat_south',x:9000,y:11000,w:2000,h:300,color:'#176B91',edge:'#63C5D8',solid:true},
+  {id:'moat_west',x:8700,y:9000,w:300,h:2000,color:'#176B91',edge:'#63C5D8',solid:true},
+  {id:'moat_east',x:11000,y:9000,w:300,h:2000,color:'#176B91',edge:'#63C5D8',solid:true}
+];
+
+These four rectangles do not overlap one another. They form a ring around the central keep footprint at approximately x=9000..11000 and y=9000..11000. Keep the moat rectangles separate from MAP_LAYOUT obstacles and from the castle wall footprints. Render each water rectangle with one base fill and a small number of static highlight strokes. No water tile grid, no nested castle object, and no full-arena water collision block.
+
+
+==============================================================================
+
+PAGE 13 — 13 — BRIDGE OVERLAYS AND INTENTIONAL WATER OVERLAP
+------------------------------------------------------------------------------
+Create a separate BRIDGE_LAYOUT array. Bridges are intentionally positioned over the four moat rectangles; this is the only intended visual overlap between water and another map layer. Do not merge bridge rectangles into WATER_LAYOUT. Use four bridges, one per side, each about 220 world units wide and 300 units long.
+
+Baseline coordinates: north bridge {x:9890,y:8700,w:220,h:300}; south bridge {x:9890,y:11000,w:220,h:300}; west bridge {x:8700,y:9890,w:300,h:220}; east bridge {x:11000,y:9890,w:300,h:220}. Give each bridge a procedural wood/stone palette, for example deck #8B6848, edge #4D382B, highlight #C49A6C, and zHeight 8. Draw a simple deck rectangle with a few plank lines and two side rails. Keep detail count low.
+
+Bridge collision must override water blocking only when the entity's collision circle intersects the bridge deck. A bridge is not a general safe zone around the moat. Projectiles should pass over water and bridge unless existing game rules intentionally block them; do not accidentally treat a bridge as a tall wall.
+
+
+==============================================================================
+
+PAGE 14 — 14 — WATER COLLISION CONTRACT
+------------------------------------------------------------------------------
+Implement a dedicated helper such as isPointInRect(x,y,r) and isOnBridge(x,y,r), or adapt the source's existing collision style. A water rectangle blocks a grounded entity when its circle overlaps water and the circle is not supported by a bridge. For a conservative and stable rule, consider the entity's center plus radius: the entity must fit sufficiently within the bridge deck to count as supported. Do not allow a player to stand with most of the body over water merely because the center barely touches a bridge.
+
+Resolve movement in the same coordinate space as the existing entity physics. Do not modify z-gravity or jumping. If the entity is airborne above a configured water-crossing threshold, follow one consistent rule: either permit crossing while airborne and apply a safe landing check, or block entry unless supported by bridge. Choose the simpler rule that matches existing gameplay and document it. Never silently teleport entities across water.
+
+
+==============================================================================
+
+PAGE 15 — 15 — BRIDGE-FIRST COLLISION ORDER
+------------------------------------------------------------------------------
+Collision order is mandatory: (1) calculate the candidate movement position using the existing movement code; (2) determine whether the candidate circle is supported by a bridge; (3) test water overlap; (4) if unsupported and water is blocked, reject or slide the candidate movement back to the last valid position; (5) resolve solid obstacle collisions using the existing circle-versus-AABB method; (6) clamp to arena bounds.
+
+Do not simply skip all water collision whenever any bridge exists. Check the specific bridge rectangle intersected by the entity. Do not change the existing obstacle Z-gating rule. Do not apply water collision to projectiles unless the current game design requires it. For bots, use the same helper as the player so bots cannot walk across water or become trapped by different rules.
+
+
+==============================================================================
+
+PAGE 16 — 16 — SAFE MOVEMENT RESOLUTION
+------------------------------------------------------------------------------
+Avoid unstable push-out loops. If a candidate position is blocked by water, first attempt axis-separated movement: test candidate X with previous Y, then candidate Y with the accepted X. If neither axis move is valid, keep the previous position. This prevents diagonal corner snagging and avoids pushing the entity into a nearby wall.
+
+If the existing engine already has a resolvedX/resolvedY movement branch, integrate water checks into that branch instead of creating a second competing movement solver. Preserve knockback and dash semantics. If a dash ends over water without bridge support, resolve to the last valid land position or cancel only the invalid portion of the dash. Do not damage, kill, or permanently immobilize the entity simply because it touches water unless that is already an explicit game rule.
+
+Add a small tolerance (for example 2–4 world units) only if required to prevent floating-point edge jitter. Do not use large tolerances that create invisible walkable strips through water.
+
+
+==============================================================================
+
+PAGE 17 — 17 — PROJECTILE AND WATER BEHAVIOUR
+------------------------------------------------------------------------------
+Keep projectile collision semantics separate from entity water movement. The current projectile system tests projectile positions against obstacle AABBs and uses projectile z to pass over low obstacles. Preserve that behavior. Do not add every water rectangle to obstaclePool, because doing so would cause projectiles to collide with water as though it were a stone wall.
+
+Unless the source contains an existing projectile-water rule, projectiles may travel across the moat and bridge. If a projectile should be stopped by a castle wall, let the existing solid wall obstacle handle it. Keep projectile collision checks limited to actual obstacle records, not biome zones, water surfaces, or bridge decks.
+
+Check all references to obstaclePool before changing its composition. It is used by entity collision, projectile collision, rendering, drop-map display, and loot spawn placement. Ensure it contains only records that those systems are intended to treat as obstacles.
+
+
+==============================================================================
+
+PAGE 18 — 18 — BIOME-AWARE OBSTACLE PRESETS
+------------------------------------------------------------------------------
+Replace the current index-based cycling of OBS_KEYS with deterministic biome-aware preset selection. The current code assigns crystal, pillar, mushroom, deadtree, bones, and brazier by array index; this produces visually random mismatches. Instead, define compact OBS_PRESETS by biome and obstacle kind, with explicit zHeight, top, front, and side hex colors.
+
+Suggested palettes: forest trees/rocks: top #477A45, front #285236, side #193A29; snow rocks/ice: top #E7F1F7, front #9AAFC0, side #667D91; ruins stone: top #A6A095, front #68665F, side #45443F; quarry crystal: top #B9A0F5, front #7549B8, side #4C2B7A; village timber/stone: top #B58B61, front #76543A, side #4B3528; harbour crates/rocks: top #A88762, front #6D5039, side #493526. Keep brazier orange and crystal purple accents rare.
+
+
+==============================================================================
+
+PAGE 19 — 19 — OBSTACLE POOL CONSTRUCTION
+------------------------------------------------------------------------------
+Build obstaclePool from MAP_LAYOUT.filter(record => record.type === 'obstacle' && record.solid). Map each record's own x, y, w, h, zHeight, colorTop, colorFront, colorSide, rotation, biome, and id. Never assign an obstacle preset based only on i % OBS_KEYS.length. If a record has explicit colors, preserve them. If colors are omitted, choose a preset from its biome and kind.
+
+Do not convert biome zone rectangles into solid obstacles. Do not add water rectangles or bridge rectangles to obstaclePool. Keep bridge collision in a separate helper and water collision in a separate helper. Do not mutate MAP_LAYOUT after obstaclePool construction. If a dynamic obstacle is necessary, store it in a separate existing-compatible pool and explain why.
+
+Keep each obstacle's collision footprint equal to its visible base footprint. The Z-height affects extrusion and existing jump gating, not the obstacle's ground-plane rectangle.
+
+
+==============================================================================
+
+PAGE 20 — 20 — PROCEDURAL 2.5D DRAWING CONTRACT
+------------------------------------------------------------------------------
+Use the existing drawExtrudedObstacle function as the visual reference. Maintain the current 2.5D convention: the obstacle's base footprint is at x/y, its extrusion is controlled by zHeight, and its top/front/side faces use the supplied hex colors. Preserve the existing shadow approach unless profiling shows it is expensive.
+
+For every map obstacle, draw the base shadow, front face, side face, and top face using Canvas paths or fillRect. Avoid image lookup and drawImage for map objects. Use save/restore around transforms and alpha/composite changes. Never leave globalAlpha, globalCompositeOperation, lineWidth, fillStyle, strokeStyle, or transforms in a changed state after drawing.
+
+Do not use expensive blur shadows for every object. If glow is needed for crystals, use one or two simple translucent shapes at low detail and disable them in low graphics mode.
+
+
+==============================================================================
+
+PAGE 21 — 21 — PROCEDURAL GROUND RENDERING
+------------------------------------------------------------------------------
+Replace the current ground-image tile loop with static biome-zone rendering. The current source declares GROUND_IMG and groundImgLoaded, then loops over visible 400-unit ground tiles and calls drawImage(GROUND_IMG,...). Remove that map image dependency and replace the visible ground loop with a loop over the small BIOME_ZONES collection or zone records in MAP_LAYOUT.
+
+For each zone, test its rectangle against the camera viewport and draw one fillRect using colorTop or a dedicated groundColor. Draw only visible zones. The base canvas background should be sea color #0B2D48. Draw the island land silhouette as one static polygon path if desired, then draw the biome rectangles clipped to that island silhouette only if clipping is simple and does not create per-frame allocations.
+
+Remove the decorative full-screen grid if it conflicts with the natural island appearance. Do not replace it with another dense grid. Keep shoreline accents to a small number of static lines or polygon shapes.
+
+
+==============================================================================
+
+PAGE 22 — 22 — PATHS, BEACHES, AND SHORELINE
+------------------------------------------------------------------------------
+Represent paths as a small static path list of line segments or polylines, not a navigation mesh and not hundreds of short segments. Use muted earth colors such as #B79A68 and darker edges #765E3E. Draw a path with a thick stroke and, if desired, one narrow highlight stroke. Paths are visual guidance only unless the existing movement system already supports path-based speed or navigation.
+
+Beach strips should be static polygons or rectangles near the coast, using #D8C28A with a darker edge #B59B64. The coastline can use one irregular island polygon against the sea base. Do not draw hundreds of wave particles. A few short static sea highlight strokes are enough. Keep all shoreline geometry within arena bounds and do not introduce invisible collision unless a cliff edge is intended.
+
+
+==============================================================================
+
+PAGE 23 — 23 — LANDMARK DETAIL CAPS
+------------------------------------------------------------------------------
+Set hard caps for decorative detail: no more than 24 small decorative polygons for the entire visible map pass; no more than 12 landmark sub-shapes per major landmark; no more than 16 bridge plank lines total; no more than 20 crystal accent polygons in the quarry; no more than 12 dock/boat primitives. These are static drawing instructions, not dynamic spawn counts.
+
+Do not build 50 separate trees. Use a forest zone rectangle, then a small number of large tree-canopy polygons or cluster silhouettes. Do not build every village house as a unique collision body. Use a few large visual blocks and only a handful of solid walls. Avoid per-frame random placement. If random variation is needed, generate it once during initialization using a deterministic seed, then reuse the result.
+
+
+==============================================================================
+
+PAGE 24 — 24 — DROP MAP AND MINIMAP COMPATIBILITY
+------------------------------------------------------------------------------
+The current drawDropMap function scales obstaclePool rectangles into a 280 × 280 drop-map canvas. Keep it functional. Update it so that biome zones can optionally be drawn as a few colored rectangles and water/bridge geometry is represented with simple scaled rectangles. Keep the existing drop-map DOM, pointer handling, pin behavior, confirm button, and selection logic unchanged.
+
+Do not change the selectedDropX/selectedDropY world mapping. Do not change the drop screen's HTML or CSS. If the drop map currently expects obstaclePool to include all terrain, update only its drawing loop to use the new arrays in the correct visual order: zones, water, bridges, then solid obstacles. Keep the overview rendering cheap.
+
+
+==============================================================================
+
+PAGE 25 — 25 — CAMERA CULLING AND DRAW ORDER
+------------------------------------------------------------------------------
+Use the existing Camera.x, Camera.y, Camera.getZoom(), window.innerWidth, window.innerHeight, and CAMERA_PITCH values. Derive the visible world rectangle using the same halfW/halfH convention already used by renderCanvas. For each static zone, water rectangle, bridge, landmark, and obstacle, skip drawing when its AABB is fully outside the visible world rectangle.
+
+Draw order should be: sea/base background; island ground silhouette; biome zones; paths and beaches; water rectangles; bridge decks; ground decals only if they are procedural and retained; landmark base shapes; obstacle shadows and extruded obstacle faces; entities/projectiles/loot according to the existing pipeline. Preserve the storm layer's current behavior and ensure the storm still overlays the intended layers.
+
+
+==============================================================================
+
+PAGE 26 — 26 — VALIDATION AND ASSERTIONS
+------------------------------------------------------------------------------
+Add a one-time development validation function, not a per-frame validator. It should verify every rectangle has finite numeric x/y/w/h, positive dimensions, and lies within arena bounds. Verify biome zones do not overlap each other. Verify the four moat rectangles are exactly four and do not overlap one another. Verify bridge records overlap their intended moat rectangle and are not accidentally outside the arena. Verify MAP_LAYOUT contains fewer than 40 physical lines and the total static data count remains small.
+
+For intentional overlaps, document the layer relationship: bridges overlay water; landmarks may be drawn over terrain; castle wall segments sit within the central keep biome. These are deliberate visual-layer relationships, not accidental collision nesting. Log a concise console warning in development if validation fails, but do not crash the game or spam the console each frame.
+
+
+==============================================================================
+
+PAGE 27 — 27 — REGRESSION TESTS: PLAYER, BOTS, AND PROJECTILES
+------------------------------------------------------------------------------
+Test the player walking toward each moat edge from land. The player must stop at water when not on a bridge. The player must cross each of the four bridges without snagging, jittering, or falling through. Test diagonal approaches to bridge corners. Test jumping and landing at bridge edges. Test dash and knockback near the water boundary. Verify a failed water move does not push the player into a castle wall.
+
+Test at least three bots approaching each bridge. Bots must use the same water/bridge rule as the player and must not stand inside the moat. Test projectiles travelling across water and hitting castle walls. Test projectile height against low and high obstacles. Confirm no water rectangle has accidentally entered obstaclePool. Confirm loot spawning does not treat the entire biome zone or water moat as a giant obstacle.
+
+
+==============================================================================
+
+PAGE 28 — 28 — PERFORMANCE AND DEVICE TEST PLAN
+------------------------------------------------------------------------------
+Profile on an actual Android phone in landscape mode. Test lobby-to-drop transition, drop-map display, normal gameplay, crowded combat, and storm phases. Compare average FPS and frame-time spikes before and after the map patch. Aim for a stable 16.7 ms frame budget on the target device; if the device cannot sustain that, reduce optional decorative details rather than changing gameplay or UI.
+
+Inspect allocations in the render loop. Confirm there is no 500 × 500 grid, no 400-unit tile loop across a huge grid, no per-frame random map generation, no nested thousands-element arrays, and no repeated construction of gradients or paths where static colors suffice. Keep low graphics mode meaningful by skipping optional glows and detail accents while preserving the core map colors and collision.
+
+
+==============================================================================
+
+PAGE 29 — 29 — IMPLEMENTATION SEQUENCE AND PATCH SAFETY
+------------------------------------------------------------------------------
+Perform the implementation in small, auditable steps: (1) read and map all current references; (2) define BIOME_ZONES/MAP_LAYOUT/WATER_LAYOUT/BRIDGE_LAYOUT; (3) update obstacle presets and obstaclePool filtering; (4) replace ground image rendering with viewport-culled solid-color zone fills; (5) add water and bridge drawing; (6) integrate one shared water/bridge support helper into player and bot movement; (7) update projectile logic only if required; (8) update drop-map rendering; (9) run static validation and regression tests.
+
+Do not rewrite the entire HTML file. Apply a minimal patch around the relevant sections. Preserve unrelated source text exactly. If a required function is unclear, search the source and adapt to the real function rather than inventing a parallel system. If a change cannot be implemented safely without editing protected UI, stop and explain the conflict instead of touching the UI.
+
+
+==============================================================================
+
+PAGE 30 — 30 — REQUIRED FINAL RESPONSE FROM THE CODE GENERATOR
+------------------------------------------------------------------------------
+After editing, return the complete updated single-file HTML or a precise patch that can be applied without missing dependencies. Also provide a concise change report listing the exact functions/constants changed, the new data arrays, the collision order, and the validation performed. State honestly whether runtime FPS was measured or only optimized by design.
+
+Before finalizing, verify: no external map image URL remains; no map drawImage call remains; no GROUND_IMG dependency remains; no 500 × 500 grid or per-tile biome blending exists; MAP_LAYOUT is under 40 physical lines; biome zone rectangles do not overlap one another; the moat uses exactly four separate water rectangles; the castle center is empty of water; bridges are separate overlays; bridge support overrides only the corresponding water rectangle; obstaclePool contains only actual solid obstacles; existing Z-height gating still works; all rectangles fit inside 20,000 × 20,000; and the Landscape UI plus all unrelated HTML/CSS are untouched.
+
+If any check fails, fix it before returning the code. Do not claim a test passed if it was not run. Do not truncate the HTML output. If the platform response limit prevents returning the whole file, provide a complete, clearly bounded patch and state exactly where each section belongs.
+

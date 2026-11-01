@@ -1,0 +1,6 @@
+{
+  "summary":  "Detailed technical implementation plan for upgrading Arcane Royale to a high-performance 2.5D pseudo-3D engine featuring Brawl Stars 60-degree angled projection, full Z-axis physics, procedural canvas extrusions with directional shadows, and obstacle Z-height collision gating. Designed for review with DeepSeek.",
+  "updatedAt":  "2026-10-31T12:18:07.252853467Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}

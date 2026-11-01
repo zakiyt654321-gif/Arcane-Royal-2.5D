@@ -1,0 +1,72 @@
+Update the game with a new premium currency, Drop Skins, a Z-axis falling mechanic at the start of the match, and a fully overhauled Minimap. Do NOT break the current map, Landscape UI, or 2.5D engine.
+
+=== 1. PLAYER DATA & ECONOMY ===
+- In `PlayerData`, add:
+  * `astralCrystals: 500` (Give the player 500 to test).
+  * `selectedDropSkin: 'RIFT'`.
+  * `unlockedDropSkins: ['RIFT']`.
+- Update `PlayerData.load()` and `PlayerData.save()` to persist these.
+- Update `updateCurrencyUI()` to display `astralCrystals` in the lobby and shop using the 🔮 icon.
+
+=== 2. SHOP UI (CRYSTALS & DROP SKINS) ===
+- In the Lobby screen, change the `💎 Vault` button to open the shop and switch to the `crystals` tab.
+- In the Shop UI, add two new tab buttons next to Champions and Gem Vault:
+  * `id="tab-btn-drops"` (Text: "🪂 Drop Skins")
+  * `id="tab-btn-crystals"` (Text: "🔮 Crystal Vault")
+- Update `switchShopTab(tab)` to handle `'drops'` and `'crystals'`.
+
+=== 3. CRYSTAL VAULT (Simulated IAP) ===
+- Create a new div `#shop-content-crystals` (class: "shop-grid hidden").
+- Inside, add 3 buttons: "Buy 100 🔮 ($0.99)", "Buy 500 🔮 ($4.99)", "Buy 1200 🔮 ($9.99)".
+- Write a function `simulatePurchase(amount)` that adds crystals to `PlayerData.astralCrystals`, calls `PlayerData.save()`, and shows a Toast message.
+
+=== 4. DROP SKINS SHOP ===
+- Create a new div `#shop-content-drops` (class: "shop-grid hidden").
+- Inside, add 4 cards:
+  1. "Arcane Rift" (Default, Free) - Button says "EQUIPPED" or "SELECT".
+  2. "Spectral Wyrm" (Cost: 300 🔮) - Button says "UNLOCK (300 🔮)".
+  3. "Floating Citadel" (Cost: 500 🔮) - Button says "UNLOCK (500 🔮)".
+  4. "Astral Descent" (Cost: 800 🔮) - Button says "UNLOCK (800 🔮)".
+- Write `buyDropSkin(skinId, cost)` and `equipDropSkin(skinId)`. Update the UI accordingly.
+
+=== 5. THE Z-AXIS DROP MECHANIC (Game Start) ===
+- In the `Game` object, change the state logic. The game starts in `"LOBBY"`, goes to `"DROPPING"` when the match starts, and then `"PLAYING"`.
+- In `Game.init(spawnX, spawnY)`:
+  * Change `this.state = "DROPPING"` instead of "PLAYING".
+  * Spawn the player at `px, py` but set `this.player.z = 2000` and `this.player.vz = 0`.
+  * Spawn bots at random X/Y but set their `z = 2000 + Math.random() * 500`.
+  * Do NOT show the HUD yet.
+- In `Game.update(deltaTime)`:
+  * If `this.state === "DROPPING"`:
+    * Apply gravity to all entities (using existing physics).
+    * Allow the player to use the joystick to steer their X/Y while falling.
+    * Check if `this.player.z <= 0`. If so, set `this.player.z = 0`, `this.player.vz = 0`, and change `Game.state = "PLAYING"`. Show the HUD now.
+    * Note: Bots should also land and change their state.
+- In `renderCanvas()`:
+  * If `Game.state === "DROPPING"`, use a wider camera view (e.g., `Camera.zoomMode = '0.6'`) to show the map below.
+  * Draw the falling trail based on `PlayerData.selectedDropSkin` (use `spawnParticles`):
+    * 'RIFT': Purple particles.
+    * 'WYRM': Green/spectral particles.
+    * 'CITADEL': Golden particles.
+    * 'ASTRAL': Cyan/blue particles.
+
+=== 6. MINIMAP OVERHAUL (Landscape Fixes) ===
+- In `renderCanvas()`, move the minimap to the **Top-Left** corner (below the HP bar) to avoid overlapping the joystick in Landscape mode.
+  * Set `const mapX = 14;`
+  * Set `const mapY = 90;` (or just below the HP card).
+- Draw the terrain INSIDE the clipped minimap area before drawing the storm and entities:
+  * Loop through `BIOME_ZONES` and fill a rectangle using `z.colorTop`.
+  * Loop through `WATER_LAYOUT` and fill a rectangle with `#3b82f6` (blue).
+  * Loop through `BRIDGE_LAYOUT` and fill a rectangle with `#78350f` (brown).
+  * Loop through `obstaclePool` and fill a rectangle with `#1e293b` (dark grey).
+- In the Minimap Expanded state (`isMapExpanded`):
+  * Change `mapSize = window.innerHeight * 0.9;`
+  * Center it: `mapX = (window.innerWidth - mapSize) / 2; mapY = (window.innerHeight - mapSize) / 2;`
+  * Hide the Joystick and Action buttons while the map is expanded (set `display: none` on the HTML elements, or just draw a dark overlay over them).
+- Update `drawDropMap()`:
+  * Ensure it draws `BIOME_ZONES`, `WATER_LAYOUT`, and `BRIDGE_LAYOUT` so players can see the bridges when selecting a drop zone.
+
+=== 7. OPERATOR KEY ===
+- Update `submitOperatorKey()` so it sets `astralCrystals = 99999` and unlocks all drop skins.
+
+Return the FULL updated HTML file.
