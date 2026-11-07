@@ -14,7 +14,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="format-detection" content="telephone=no" />
     <title>Arcane Royale — 50-Player Arcane Battle Royale</title>
-    <meta name="description" content="Arcane Royale is a offline-ready 2.5D battle royale for desktop and mobile. Master three champions, outplay 49 rivals, and survive the collapsing arcane storm." />
+    <meta name="description" content="Arcane Royale is an HTML5 2.5D battle royale for desktop and mobile. Master three champions, outplay 49 rivals, and survive the collapsing arcane storm." />
     <meta property="og:title" content="Arcane Royale" />
     <meta property="og:description" content="Arcane Royale - Fast-paced mobile battle royale." />
     <meta property="og:type" content="website" />
@@ -1537,9 +1537,17 @@
 
 
       /* Match inventory, channelling, and mobility */
-      #action-buttons { max-width: min(390px, 58vw); flex-wrap: wrap; justify-content: flex-end; }
-      #btn-mana { background: radial-gradient(circle at 35% 25%, #8eeaff, #176ba1 72%); }
-      #btn-super { background: radial-gradient(circle at 35% 25%, #ffe28a, #b45309 72%); }
+      #action-buttons { width: 230px; height: 230px; max-width: none; }
+      #btn-mana {
+        width: 60px; height: 60px; left: 0; top: 55px;
+        background: radial-gradient(circle at 35% 25%, #8eeaff, #176ba1 72%);
+        border-color: #a5f3fc; z-index: 4;
+      }
+      #btn-super {
+        width: 58px; height: 58px; left: 88px; top: 80px;
+        background: radial-gradient(circle at 35% 25%, #ffe28a, #b45309 72%);
+        border-color: #fde68a; z-index: 4;
+      }
       #btn-super.active { border-color: #fef08a; box-shadow: 0 0 24px rgba(251,191,36,0.75), inset 0 1px rgba(255,255,255,0.3); }
       #inventory-hud {
         position: absolute; left: 50%; bottom: calc(var(--safe-bottom) + 94px);
@@ -1579,7 +1587,7 @@
       #stamina-wrapper { transition: opacity 0.2s; }
       #shield-text { color: #67e8f9; font-size: 9px; margin-left: 4px; }
       @media (max-width: 700px), (max-height: 520px) {
-        #action-buttons { max-width: min(342px, 61vw); gap: 5px; }
+        #action-buttons { max-width: none; }
         .action-btn { width: 50px; height: 50px; }
         .action-icon { width: 23px; height: 23px; }
         .btn-name { font-size: 7px; }
@@ -1593,9 +1601,9 @@
         #item-channel { bottom: calc(var(--safe-bottom) + 118px); }
       }
       @media (max-width: 480px) and (orientation: portrait) {
-        #inventory-hud { bottom: calc(var(--safe-bottom) + 128px); }
-        #item-details, #item-channel { bottom: calc(var(--safe-bottom) + 184px); }
-        #action-buttons { max-width: 220px; }
+        #inventory-hud { bottom: calc(var(--safe-bottom) + 210px); }
+        #item-details, #item-channel { bottom: calc(var(--safe-bottom) + 266px); }
+        #action-buttons { max-width: none; }
       }
 
       /* Responsive layouts */
@@ -1640,6 +1648,11 @@
         #drop-screen { justify-content: flex-start; }
         #drop-map-container { width: min(250px, 49vh) !important; height: min(250px, 49vh) !important; }
         .drop-actions { margin-top: 8px; }
+        #kill-feed {
+          top: calc(var(--safe-top) + 64px); left: 50%; right: auto;
+          transform: translateX(-50%); align-items: center; max-width: min(340px, 52vw);
+        }
+        #kill-feed .kill-feed-item { max-width: 100%; padding: 3px 7px; font-size: 9px; }
       }
       @media (max-width: 520px) {
         .hud-stats-card { min-width: 138px; padding: 5px 8px; }
@@ -1650,6 +1663,18 @@
         #fps-counter { display: none; }
         .combat-stats { top: calc(var(--safe-top) + 68px); }
         .shop-tabs { border-radius: 12px; }
+      }
+      @media (max-width: 520px) and (orientation: portrait) {
+        #hud-center-top { top: calc(var(--safe-top) + 140px); }
+        .waypoint-hud {
+          top: calc(var(--safe-top) + 178px); left: auto; right: var(--safe-right);
+          transform: none; max-width: calc(100vw - 125px);
+        }
+        #kill-feed {
+          top: calc(var(--safe-top) + 236px); left: 50%; right: auto;
+          transform: translateX(-50%); align-items: center; max-width: 70vw;
+        }
+        #kill-feed .kill-feed-item { max-width: 100%; padding: 3px 7px; font-size: 9px; }
       }
       .reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {
         scroll-behavior: auto !important;
@@ -1851,10 +1876,10 @@
         </div>
       </div>
 
-      <!-- OFFLINE DEMO SANDBOX -->
+      <!-- DEMO SANDBOX -->
       <div id="operator-modal" class="overlay-screen hidden" role="dialog" aria-modal="true" aria-labelledby="demo-title" style="z-index: 200; background: rgba(0,0,0,0.85);">
         <div class="gameover-box" style="max-width: 360px; padding: 24px;">
-          <div class="eyebrow">Offline sandbox</div>
+          <div class="eyebrow">HTML5 sandbox</div>
           <h2 id="demo-title" style="color: #c9a5ff; margin: 10px 0; font-weight: 900;">DEMO SUPPLY DROP</h2>
           <p class="demo-notice">This is a local single-player demo. Claiming supplies costs nothing and never starts a payment.</p>
           <p style="margin: 16px 0; color: #f8fafc; font-size: 14px; line-height: 1.7;">+2,500 🪙 &nbsp; +2,500 🔮<br><span style="color: #a7b4ca; font-size: 11px;">Enough to explore every champion and every drop trail.</span></p>
@@ -1881,7 +1906,7 @@
             <button type="button" class="btn-lobby-sec" onclick="openShop('crystals')" style="padding: 4px 12px; font-size: 11px;">🔮 Vault</button>
             <button type="button" id="btn-autoaim" class="btn-lobby-sec" onclick="toggleAutoAim()" style="padding: 4px 12px; font-size: 11px;">🎯 Auto-Aim: ON</button>
             <button type="button" id="btn-settings" class="btn-operator" onclick="openSettings()" title="Settings" aria-label="Open settings">⚙️</button>
-            <button type="button" id="btn-operator" class="btn-operator" onclick="triggerOperatorAccess()" title="Open offline demo supplies" aria-label="Open offline demo supplies">✨</button>
+            <button type="button" id="btn-operator" class="btn-operator" onclick="triggerOperatorAccess()" title="Open demo supplies" aria-label="Open demo supplies">✨</button>
           </div>
         </div>
 
@@ -1902,7 +1927,7 @@
                 <span class="feature-chip">⚔ Three champions</span>
                 <span class="feature-chip">🌀 Dynamic storm</span>
                 <span class="feature-chip">🎮 Touch + keyboard</span>
-                <span class="feature-chip">📴 Offline · no account</span>
+                <span class="feature-chip">🌐 HTML5 · no account</span>
               </div>
               <div class="lobby-record" role="group" aria-label="Career statistics">
                 <div class="record-item"><span id="career-wins" class="record-value">0</span><span class="record-label">Victories</span></div>
@@ -1996,7 +2021,7 @@
             <div class="shop-item-card" style="grid-column: 1 / -1; text-align: center; padding: 24px;">
               <div style="font-size: 32px; margin-bottom: 8px;">💎</div>
               <strong style="color: #38bdf8; font-size: 16px;">Arcane Gem Vault</strong>
-              <p style="font-size: 12px; color: #94a3b8; margin: 8px 0 14px;">Gems are earned through high placements in battle. This standalone edition has no purchases, accounts, ads, or external services.</p>
+              <p style="font-size: 12px; color: #94a3b8; margin: 8px 0 14px;">Gems are earned through high placements in battle. This HTML5 edition has no purchases, accounts, ads, or analytics.</p>
               <div style="display: inline-block; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 8px 16px; font-size: 11px; color: #cbd5e1;">
                 🏆 1st Place Win = +5 Gems &bull; 2nd Place = +2 Gems &bull; 3rd Place = +1 Gem
               </div>
@@ -2006,9 +2031,9 @@
           <!-- Drop Skins Tab Content -->
           <div id="shop-content-drops" class="shop-grid hidden" role="tabpanel"></div>
 
-          <!-- Crystal Vault Content (explicit offline demo grants) -->
+          <!-- Crystal Vault Content (explicit demo grants) -->
           <div id="shop-content-crystals" class="shop-grid hidden" role="tabpanel">
-            <div class="demo-notice" style="grid-column: 1 / -1;">Offline demo supplies — no real-money purchases, payment details, or external service are used.</div>
+            <div class="demo-notice" style="grid-column: 1 / -1;">Demo supplies — no real-money purchases, payment details, or payment services are used.</div>
             <div class="shop-item-card" style="text-align: center; padding: 18px 14px;">
               <div style="font-size: 28px; margin-bottom: 4px;">🔮</div>
               <strong style="color: #c084fc; font-size: 14px;">Pouch of Crystals</strong>
@@ -2563,7 +2588,7 @@
         }
       }
 
-      // Explicit offline demo supplies (no payment or secret key)
+      // Explicit demo supplies (no payment or secret key)
       function triggerOperatorAccess() {
         AudioEngine.init();
         document.getElementById('operator-modal').classList.remove('hidden');
@@ -2717,7 +2742,7 @@
       // ==========================================
       // ASSET LOADER (PART B)
       // ==========================================
-      const ASSET_BASE = '';
+      const ASSET_BASE = 'https://zakiyt654321-gif.github.io/Arcane-Royal-2.5D/';
       const AssetLoader = {
         images: {},
         buffers: {},
@@ -2725,14 +2750,15 @@
         loaded: 0,
         total: 0,
 
-        // Review-friendly local artwork paths; audio remains procedural and offline.
+        // Optimized WebP derivatives of the supplied PNG masters reduce mobile data use.
+        // Original PNG artwork remains in assets/Image/UI for review; audio is procedural.
         manifest: [
           { key: 'sprite_BERSERKER', type: 'img', path: 'assets/Image/Sheets/berserker_sheet.webp' },
           { key: 'sprite_TIDECALLER', type: 'img', path: 'assets/Image/Sheets/tidecaller_sheet.webp' },
           { key: 'sprite_SHADOW', type: 'img', path: 'assets/Image/Sheets/shadow_sheet.webp' },
-          { key: 'portrait_BERSERKER', type: 'img', path: 'assets/Image/UI/portrait_berserker.png' },
-          { key: 'portrait_TIDECALLER', type: 'img', path: 'assets/Image/UI/portrait_tidecaller.png' },
-          { key: 'portrait_SHADOW', type: 'img', path: 'assets/Image/UI/portrait_shadow.png' },
+          { key: 'portrait_BERSERKER', type: 'img', path: 'assets/Image/UI/portrait_berserker.webp' },
+          { key: 'portrait_TIDECALLER', type: 'img', path: 'assets/Image/UI/portrait_tidecaller.webp' },
+          { key: 'portrait_SHADOW', type: 'img', path: 'assets/Image/UI/portrait_shadow.webp' },
           { key: 'map', type: 'img', path: 'assets/Image/ground.webp' }
         ],
 
@@ -2988,12 +3014,14 @@
       }
 
       // Export a clean HTML entry point with no captured runtime state.
-      // Keep the assets folder beside it for the supplied artwork.
+      // Artwork loads from the public GitHub Pages host; no local asset folder is required.
       function exportGameFile() {
         AudioEngine.init();
         try {
           const clone = document.documentElement.cloneNode(true);
-          clone.querySelectorAll('script[src], link[href*="aistudio"], [id^="__aistudio"]').forEach(element => element.remove());
+          // The game uses one plain inline script. Remove Vite/React development
+          // modules as well as external scripts so file:// exports stay self-contained.
+          clone.querySelectorAll('script[src], script[type="module"], link[href*="aistudio"], [id^="__aistudio"]').forEach(element => element.remove());
           clone.querySelectorAll('style').forEach(style => {
             if (style.textContent.includes('aistudio-')) style.remove();
           });
@@ -3082,7 +3110,7 @@
           link.remove();
           setTimeout(() => URL.revokeObjectURL(url), 5000);
           AudioEngine.sfxPurchase();
-          showToast('✓ HTML exported — keep the assets folder beside it', false);
+          showToast('✓ HTML5 exported — hosted artwork requires an internet connection', false);
         } catch (error) {
           console.error('[Export] Failed to create clean HTML.', error);
           showToast('Could not export the HTML file. Please try again.', true);

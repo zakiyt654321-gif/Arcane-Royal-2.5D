@@ -11,9 +11,9 @@ const gameImagePaths = [
   'assets/Image/Sheets/berserker_sheet.webp',
   'assets/Image/Sheets/tidecaller_sheet.webp',
   'assets/Image/Sheets/shadow_sheet.webp',
-  'assets/Image/UI/portrait_berserker.png',
-  'assets/Image/UI/portrait_tidecaller.png',
-  'assets/Image/UI/portrait_shadow.png',
+  'assets/Image/UI/portrait_berserker.webp',
+  'assets/Image/UI/portrait_tidecaller.webp',
+  'assets/Image/UI/portrait_shadow.webp',
 ];
 
 function emitGameImages(): Plugin {
