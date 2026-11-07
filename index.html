@@ -592,6 +592,33 @@
         cursor: pointer;
         transition: background-color 0.2s;
       }
+      .rotate-prompt-actions { display: flex; flex-direction: column; align-items: stretch; gap: 10px; width: min(280px, 100%); }
+      .btn-rotate-force {
+        min-height: 44px; padding: 10px 20px; border: 1px solid rgba(255,240,174,0.55);
+        border-radius: 22px; background: linear-gradient(120deg, #ffcb63, #ff8a61);
+        color: #21130c; font-size: 13px; font-weight: 900; cursor: pointer;
+      }
+      .force-landscape-shell, .force-landscape-shell body {
+        position: fixed; inset: 0; width: 100%; height: 100%; overflow: hidden; background: #050510;
+      }
+      .force-landscape-shell body > :not(#rotation-stage) { display: none !important; }
+      .force-landscape-shell body > #rotation-stage {
+        position: fixed; display: block !important; transform-origin: center center;
+        overflow: hidden; background: #080b16; box-shadow: 0 0 40px #000; z-index: 100000;
+      }
+      #rotation-bar {
+        position: absolute; inset: 0 0 auto; height: 40px; display: flex; align-items: center; gap: 8px;
+        padding: 4px 8px; border-bottom: 1px solid rgba(168,121,255,0.35); background: #0c1222;
+        color: #dbeafe; font: 700 11px/1 system-ui, sans-serif; letter-spacing: 0.04em;
+      }
+      #rotation-bar-label { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .rotation-bar-btn {
+        min-width: 62px; height: 30px; padding: 0 10px; border: 1px solid rgba(103,232,249,0.35);
+        border-radius: 15px; background: #17243b; color: #ecfeff; font: 800 11px/1 system-ui, sans-serif;
+        cursor: pointer; touch-action: manipulation;
+      }
+      #rotation-frame { position: absolute; left: 0; top: 40px; display: block; border: 0; background: #07090e; }
+
       .btn-rotate-dismiss:active {
         background: rgba(255, 255, 255, 0.16);
       }
@@ -1700,8 +1727,11 @@
         </svg>
       </div>
       <h2>ROTATE TO LANDSCAPE</h2>
-      <p>Arcane Royale is optimized for two-thumb landscape battle royale combat.</p>
-      <button type="button" class="btn-rotate-dismiss" onclick="dismissLandscapePrompt()">Play in portrait anyway</button>
+      <p>Arcane Royale is optimized for two-thumb landscape battle royale combat. Force landscape works in your browser—no app required.</p>
+      <div class="rotate-prompt-actions">
+        <button type="button" class="btn-rotate-force" onclick="forceLandscapeView()">↻ Force landscape</button>
+        <button type="button" class="btn-rotate-dismiss" onclick="dismissLandscapePrompt()">Play in portrait anyway</button>
+      </div>
     </div>
 
     <canvas id="gameCanvas" role="img" aria-label="Arcane Royale battle arena">Your browser needs Canvas support to run Arcane Royale.</canvas>
@@ -2167,6 +2197,7 @@
           </div>
 
           <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 8px;">
+            <button type="button" class="btn-lobby-sec" onclick="forceLandscapeView()" style="justify-content: center;">↻ Force landscape view <span style="font-size: 10px; color: #94a3b8;">(no app)</span></button>
             <button type="button" class="btn-lobby-sec" onclick="resetPlayerProgress()" style="color: #f87171; border-color: rgba(239, 68, 68, 0.4); justify-content: center; font-size: 11px;">⚠️ Reset Game Progress</button>
             <button type="button" class="btn-lobby-main" onclick="closeSettings()" style="width: 100%; justify-content: center; padding: 10px; font-size: 13px;">SAVE &amp; CLOSE</button>
           </div>
@@ -2207,7 +2238,75 @@
     </div>
 
     <!-- ENGINE & GAME LOGIC -->
-<script>
+    <script>
+      (() => {
+        const query = new URLSearchParams(window.location.search);
+        const rotation = query.get('forceLandscape');
+        const startRuntime = () => {
+          const source = document.getElementById('arcane-game-source');
+          const runtime = document.createElement('script');
+          runtime.dataset.arcaneRuntime = 'true';
+          runtime.textContent = source.textContent;
+          document.body.appendChild(runtime);
+        };
+        const startRotationShell = initialDirection => {
+          let direction = initialDirection;
+          const stage = document.createElement('div');
+          stage.id = 'rotation-stage';
+          const bar = document.createElement('div');
+          bar.id = 'rotation-bar';
+          const label = document.createElement('span');
+          label.id = 'rotation-bar-label';
+          label.textContent = 'LANDSCAPE VIEW · Turn your phone sideways';
+          const flip = document.createElement('button');
+          flip.type = 'button'; flip.className = 'rotation-bar-btn'; flip.textContent = '↻ Flip';
+          flip.setAttribute('aria-label', 'Rotate the game in the other direction');
+          const exit = document.createElement('button');
+          exit.type = 'button'; exit.className = 'rotation-bar-btn'; exit.textContent = '✕ Exit';
+          exit.setAttribute('aria-label', 'Exit forced landscape view');
+          const frame = document.createElement('iframe');
+          frame.id = 'rotation-frame';
+          frame.title = 'Arcane Royale — landscape game view';
+          frame.setAttribute('allow', 'fullscreen; gamepad; autoplay');
+          const cleanURL = new URL(window.location.href);
+          cleanURL.searchParams.delete('forceLandscape');
+          frame.src = cleanURL.toString();
+          bar.append(label, flip, exit);
+          stage.append(bar, frame);
+          document.body.appendChild(stage);
+          const layout = () => {
+            const portrait = window.innerHeight > window.innerWidth;
+            const logicalWidth = portrait ? window.innerHeight : window.innerWidth;
+            const logicalHeight = portrait ? window.innerWidth : window.innerHeight;
+            const angle = portrait ? (direction === 'cw' ? 90 : -90) : 0;
+            stage.style.width = logicalWidth + 'px';
+            stage.style.height = logicalHeight + 'px';
+            stage.style.left = ((window.innerWidth - logicalWidth) / 2) + 'px';
+            stage.style.top = ((window.innerHeight - logicalHeight) / 2) + 'px';
+            stage.style.transform = `rotate(${angle}deg)`;
+            frame.style.width = logicalWidth + 'px';
+            frame.style.height = Math.max(0, logicalHeight - 40) + 'px';
+          };
+          flip.addEventListener('click', () => {
+            direction = direction === 'cw' ? 'ccw' : 'cw';
+            const url = new URL(window.location.href);
+            url.searchParams.set('forceLandscape', direction);
+            window.history.replaceState(null, '', url);
+            layout();
+          });
+          exit.addEventListener('click', () => window.location.replace(cleanURL.toString()));
+          window.addEventListener('resize', layout);
+          layout();
+        };
+        if (rotation === 'cw' || rotation === 'ccw') {
+          document.documentElement.classList.add('force-landscape-shell');
+          document.addEventListener('DOMContentLoaded', () => startRotationShell(rotation), { once: true });
+        } else {
+          document.addEventListener('DOMContentLoaded', startRuntime, { once: true });
+        }
+      })();
+    </script>
+    <script type="text/plain" id="arcane-game-source">
       /**
        * ARCANE ROYALE - Mobile Optimized Battle Royale Engine
        * 60FPS Pure Canvas + Progressive Economy System
@@ -2372,6 +2471,26 @@
             screen.orientation.lock('landscape').catch(() => {});
           }
         } catch(e) {}
+      }
+      async function forceLandscapeView() {
+        AudioEngine.init();
+        let nativeLocked = false;
+        try {
+          if (document.documentElement.requestFullscreen && !document.fullscreenElement) {
+            try { await document.documentElement.requestFullscreen(); } catch (error) { /* CSS rotation remains available. */ }
+          }
+          if (screen.orientation && screen.orientation.lock) {
+            await screen.orientation.lock('landscape');
+            nativeLocked = true;
+          }
+        } catch (error) { /* Unsupported orientation locks use the in-browser rotated view. */ }
+        if (nativeLocked || window.innerWidth > window.innerHeight) {
+          dismissLandscapePrompt();
+          return;
+        }
+        const url = new URL(window.location.href);
+        url.searchParams.set('forceLandscape', 'cw');
+        window.location.assign(url.toString());
       }
       window.addEventListener('load', tryLockLandscape);
       window.addEventListener('touchstart', tryLockLandscape, { passive: true });
@@ -3019,12 +3138,15 @@
         AudioEngine.init();
         try {
           const clone = document.documentElement.cloneNode(true);
-          // The game uses one plain inline script. Remove Vite/React development
-          // modules as well as external scripts so file:// exports stay self-contained.
-          clone.querySelectorAll('script[src], script[type="module"], link[href*="aistudio"], [id^="__aistudio"]').forEach(element => element.remove());
+          // Remove the injected runtime and development modules. The inline source and
+          // bootstrap rebuild exactly one game runtime when the export opens.
+          clone.querySelectorAll('script[data-arcane-runtime], script[src], script[type="module"], link[href*="aistudio"], [id^="__aistudio"]').forEach(element => element.remove());
           clone.querySelectorAll('style').forEach(style => {
             if (style.textContent.includes('aistudio-')) style.remove();
           });
+          clone.classList.remove('force-landscape-shell');
+          const landscapePrompt = clone.querySelector('#landscape-prompt');
+          if (landscapePrompt) landscapePrompt.classList.remove('dismissed');
           const byId = id => clone.querySelector('#' + id);
           clone.querySelectorAll('.overlay-screen').forEach(screen => {
             screen.classList.add('hidden');
