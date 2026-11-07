@@ -1493,7 +1493,26 @@
         color: #d5deed !important;
         font-size: 10px !important;
       }
-      .combat-stats { position: absolute; top: calc(var(--safe-top) + 76px); left: var(--safe-left); display: flex; gap: 7px; pointer-events: none; }
+      .hud-map-actions { display: flex; gap: 4px; margin-top: 4px; }
+      .hud-map-actions .hud-tool { min-width: 52px; margin-top: 0 !important; }
+      .waypoint-hud {
+        position: absolute; top: calc(var(--safe-top) + 82px); left: 50%; transform: translateX(-50%);
+        z-index: 26; display: flex; align-items: center; gap: 8px; max-width: min(420px, 62vw);
+        padding: 6px 7px 6px 11px; border: 1px solid rgba(103, 232, 249, 0.42); border-radius: 999px;
+        background: rgba(4, 18, 29, 0.9); color: #a5f3fc; box-shadow: 0 5px 22px rgba(0,0,0,0.35);
+        font-size: 11px; font-weight: 800; letter-spacing: 0.02em; pointer-events: none; white-space: nowrap;
+      }
+      #waypoint-text { overflow: hidden; text-overflow: ellipsis; }
+      #btn-clear-ping {
+        width: 24px; height: 24px; flex: 0 0 24px; padding: 0; border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 50%; background: rgba(255,255,255,0.08); color: #fff; cursor: pointer; pointer-events: auto;
+      }
+      .map-help {
+        position: absolute; z-index: 24; left: 50%; bottom: calc(var(--safe-bottom) + 8px); transform: translateX(-50%);
+        width: max-content; max-width: 90vw; padding: 7px 12px; border: 1px solid rgba(103,232,249,0.25);
+        border-radius: 999px; background: rgba(4,12,24,0.88); color: #c8edf5; text-align: center;
+        font-size: 10px; font-weight: 700; pointer-events: none;
+      }
       .combat-stat { padding: 5px 9px; border: 1px solid var(--line); border-radius: 9px; background: rgba(7,11,23,0.62); color: var(--muted); font-size: 10px; font-weight: 750; }
       .combat-stat strong { color: var(--gold); font-variant-numeric: tabular-nums; }
       #joystick-zone { left: var(--safe-left); bottom: var(--safe-bottom); background: radial-gradient(circle, rgba(160,181,230,0.11), rgba(63,76,113,0.04)); border-color: rgba(200,215,255,0.26); backdrop-filter: blur(4px); }
@@ -1639,11 +1658,19 @@
           <div style="min-width: 80px; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
             <div id="fps-counter" style="font-size: 11px; font-weight: 700; color: #64748b;">60 FPS</div>
             <button type="button" id="btn-zoom-toggle" class="interactive hud-tool" onclick="toggleZoom()" style="background: rgba(30,41,59,0.9); border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 3px 8px; font-size: 10px; color: #cbd5e1; font-weight: 700; cursor: pointer; white-space: nowrap;">🔍 Zoom: Auto</button>
-            <button type="button" id="btn-expand-map" class="interactive hud-tool" onclick="toggleMapExpand()" style="background: rgba(30,41,59,0.9); border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 3px 8px; font-size: 10px; color: #cbd5e1; font-weight: 700; cursor: pointer; white-space: nowrap; margin-top: 4px;">🗺️ Map</button>
+            <div class="hud-map-actions">
+              <button type="button" id="btn-expand-map" class="interactive hud-tool" onclick="toggleMapExpand()" aria-expanded="false" aria-label="Expand island map" style="background: rgba(30,41,59,0.9); border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 3px 8px; font-size: 10px; color: #cbd5e1; font-weight: 700; cursor: pointer; white-space: nowrap;">🗺️ Map</button>
+              <button type="button" id="btn-ping" class="interactive hud-tool" onclick="pingAtAim()" aria-label="Place waypoint ahead — G" title="Ping ahead (G)">📍 Ping</button>
+            </div>
             <button type="button" id="btn-pause" class="interactive hud-tool" onclick="togglePause()" aria-label="Pause game">Ⅱ Pause</button>
           </div>
         </div>
 
+        <div id="waypoint-hud" class="waypoint-hud hidden" role="group" aria-label="Current waypoint">
+          <span id="waypoint-text">📍 Waypoint</span>
+          <button type="button" id="btn-clear-ping" class="interactive" onclick="clearMapPing()" aria-label="Clear waypoint" title="Clear waypoint (C)">×</button>
+        </div>
+        <div id="map-help" class="map-help hidden">Tap the island to place a ping · Right-click or C to clear · M to close</div>
         <div id="kill-feed" role="log" aria-live="polite" aria-relevant="additions" aria-label="Elimination feed"></div>
         <div id="art-banner" aria-hidden="true">CRIMSON CLEAVE!</div>
         <div id="combat-stats" class="combat-stats" role="group" aria-label="Current match statistics">
@@ -1897,7 +1924,7 @@
             <div class="shop-item-card" style="text-align: center; padding: 18px 14px;">
               <div style="font-size: 28px; margin-bottom: 4px;">🔮</div>
               <strong style="color: #c084fc; font-size: 14px;">Pouch of Crystals</strong>
-              <p style="font-size: 11px; color: #94a3b8; margin: 4px 0 12px;">100 Astral Crystals for drop trails & cosmetic unlocks.</p>
+              <p style="font-size: 11px; color: #94a3b8; margin: 4px 0 12px;">100 Astral Crystals for drop trails &amp; cosmetic unlocks.</p>
               <button type="button" class="btn-buy" onclick="claimDemoCrystals(100)" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #7e22ce, #a855f7);">Demo grant +100 🔮</button>
             </div>
             <div class="shop-item-card" style="text-align: center; padding: 18px 14px; border-color: rgba(192, 132, 252, 0.6); box-shadow: 0 0 18px rgba(168, 85, 247, 0.25);">
@@ -2028,7 +2055,7 @@
 
           <div style="margin-top: 6px; display: flex; flex-direction: column; gap: 8px;">
             <button type="button" class="btn-lobby-sec" onclick="resetPlayerProgress()" style="color: #f87171; border-color: rgba(239, 68, 68, 0.4); justify-content: center; font-size: 11px;">⚠️ Reset Game Progress</button>
-            <button type="button" class="btn-lobby-main" onclick="closeSettings()" style="width: 100%; justify-content: center; padding: 10px; font-size: 13px;">SAVE & CLOSE</button>
+            <button type="button" class="btn-lobby-main" onclick="closeSettings()" style="width: 100%; justify-content: center; padding: 10px; font-size: 13px;">SAVE &amp; CLOSE</button>
           </div>
         </div>
       </div>
@@ -2044,6 +2071,7 @@
             <div class="tutorial-item"><strong>Dash &amp; leap</strong><span><kbd>Shift</kbd> grants brief invulnerability and clears low obstacles.</span></div>
             <div class="tutorial-item"><strong>Arcane art</strong><span><kbd>Q</kbd> unleashes your champion’s signature ability.</span></div>
             <div class="tutorial-item"><strong>Map &amp; pause</strong><span><kbd>M</kbd> expands the map · <kbd>Esc</kbd> pauses the battle.</span></div>
+            <div class="tutorial-item"><strong>Waypoint pings</strong><span>Tap the expanded island to ping. <kbd>G</kbd> pings ahead · <kbd>C</kbd> clears.</span></div>
             <div class="tutorial-item"><strong>Survive</strong><span>Stay inside the safe zone. Gather gold, gems, health, and mana.</span></div>
           </div>
           <button type="button" class="btn-lobby-main" onclick="dismissTutorial()" style="width: 100%; justify-content: center; padding: 10px; font-size: 14px; margin-top: 6px;">ENTER ARENA</button>
@@ -2232,14 +2260,169 @@
         checkTutorial();
       }
 
+      const MAP_REGIONS = [
+        { name: 'Frostpeak', label: 'FROSTPEAK', x: 0.51, y: 0.08 },
+        { name: 'Moonruins', label: 'MOONRUINS', x: 0.47, y: 0.20 },
+        { name: 'Whispering Woods', label: 'WHISPERING WOODS', x: 0.18, y: 0.25 },
+        { name: 'Ruined City', label: 'RUINED CITY', x: 0.75, y: 0.28 },
+        { name: 'Arcane Keep', label: 'ARCANE KEEP', x: 0.50, y: 0.47 },
+        { name: 'Crystal Quarry', label: 'CRYSTAL QUARRY', x: 0.19, y: 0.75 },
+        { name: 'Emberport', label: 'EMBERPORT', x: 0.73, y: 0.77 },
+        { name: 'South Docks', label: 'SOUTH DOCKS', x: 0.90, y: 0.86 }
+      ];
+      const MINIMAP_VIEW = { x: 0, y: 0, size: 0, scale: 0 };
+      let activePing = null;
+
+      function getMinimapLayout() {
+        let size;
+        let x;
+        let y;
+        if (isMapExpanded) {
+          const top = Math.min(92, Math.max(70, window.innerHeight * 0.12));
+          const bottom = 28;
+          size = Math.max(0, Math.min(window.innerWidth - 24, window.innerHeight - top - bottom, 720));
+          x = (window.innerWidth - size) / 2;
+          y = top + (window.innerHeight - top - bottom - size) / 2;
+        } else {
+          size = Math.max(88, Math.min(128, Math.min(window.innerWidth, window.innerHeight) * 0.2));
+          x = 14;
+          y = Math.max(12, Math.min(90, window.innerHeight - size - 12));
+        }
+        MINIMAP_VIEW.x = x;
+        MINIMAP_VIEW.y = y;
+        MINIMAP_VIEW.size = size;
+        MINIMAP_VIEW.scale = size / ARENA_WIDTH;
+        return MINIMAP_VIEW;
+      }
+
+      function worldToMapScreen(worldX, worldY, view = MINIMAP_VIEW) {
+        return {
+          x: view.x + worldX / ARENA_WIDTH * view.size,
+          y: view.y + worldY / ARENA_HEIGHT * view.size
+        };
+      }
+
+      function screenToMapWorld(screenX, screenY, view = MINIMAP_VIEW) {
+        if (!view || view.size <= 0) return { x: 0, y: 0, inside: false };
+        const nx = (screenX - view.x) / view.size;
+        const ny = (screenY - view.y) / view.size;
+        return {
+          x: Math.max(0, Math.min(ARENA_WIDTH, nx * ARENA_WIDTH)),
+          y: Math.max(0, Math.min(ARENA_HEIGHT, ny * ARENA_HEIGHT)),
+          inside: nx >= 0 && nx <= 1 && ny >= 0 && ny <= 1
+        };
+      }
+
+      function getMapRegion(worldX, worldY) {
+        let nearest = null;
+        let nearestDistance = Infinity;
+        for (const region of MAP_REGIONS) {
+          const distance = Math.hypot(worldX - region.x * ARENA_WIDTH, worldY - region.y * ARENA_HEIGHT);
+          if (distance < nearestDistance) {
+            nearest = region;
+            nearestDistance = distance;
+          }
+        }
+        return { region: nearest, distance: nearestDistance };
+      }
+
+      function getRegionName(worldX, worldY) {
+        const nearest = getMapRegion(worldX, worldY);
+        return nearest.distance <= 4000 && nearest.region ? nearest.region.name : 'Island Wilds';
+      }
+
+      function formatWorldDistance(distance) {
+        if (!Number.isFinite(distance)) return '';
+        return distance < 1000 ? `${Math.max(0, Math.round(distance / 10) * 10)} m` : `${(distance / 1000).toFixed(1)} km`;
+      }
+
+      function updateWaypointHUD() {
+        const panel = document.getElementById('waypoint-hud');
+        const text = document.getElementById('waypoint-text');
+        if (!panel || !text) return;
+        const activeState = Game.state === 'PLAYING' || Game.state === 'DROPPING' || Game.state === 'PAUSED';
+        if (!activePing || !Game.player || !activeState) {
+          panel.classList.add('hidden');
+          return;
+        }
+        const distance = Math.hypot(Game.player.x - activePing.x, Game.player.y - activePing.y);
+        text.textContent = `📍 ${activePing.label} · ${formatWorldDistance(distance)}`;
+        panel.classList.remove('hidden');
+      }
+
+      function setMapPing(worldX, worldY, options = {}) {
+        if (Game.state !== 'PLAYING' && Game.state !== 'DROPPING') return false;
+        if (!Number.isFinite(worldX) || !Number.isFinite(worldY)) return false;
+        const x = Math.max(20, Math.min(ARENA_WIDTH - 20, worldX));
+        const y = Math.max(20, Math.min(ARENA_HEIGHT - 20, worldY));
+        const nearest = getMapRegion(x, y);
+        const label = nearest.distance <= 4000 && nearest.region ? nearest.region.name : 'Custom waypoint';
+        activePing = { x, y, label, createdAt: Game.time };
+        updateWaypointHUD();
+        if (!options.silent) {
+          showToast(`📍 ${label} · ${formatWorldDistance(Game.player ? Math.hypot(Game.player.x - x, Game.player.y - y) : 0)}`, false);
+          haptic(18);
+          AudioEngine.playTone(620, 'sine', 0.08, 0.16, 880);
+        }
+        return true;
+      }
+
+      function clearMapPing(silent = false) {
+        if (!activePing) { updateWaypointHUD(); return; }
+        activePing = null;
+        updateWaypointHUD();
+        if (!silent) showToast('Waypoint cleared', false);
+      }
+
+      function pingAtAim() {
+        const player = Game.player;
+        if (!player || !player.isAlive) return;
+        const distance = 650;
+        setMapPing(player.x + Math.cos(player.facingAngle) * distance, player.y + Math.sin(player.facingAngle) * distance);
+      }
+
+      function updateWaypointProgress() {
+        if (!activePing || Game.state !== 'PLAYING' || !Game.player || !Game.player.isAlive) return;
+        if (Math.hypot(Game.player.x - activePing.x, Game.player.y - activePing.y) <= 85) {
+          clearMapPing(true);
+          showToast('📍 Waypoint reached', false);
+          AudioEngine.playTone(740, 'sine', 0.1, 0.16, 1040);
+        }
+      }
+
+      function handleMinimapPointer(event) {
+        if (Game.state !== 'PLAYING' && Game.state !== 'DROPPING') return;
+        const view = getMinimapLayout();
+        const rect = CANVAS.getBoundingClientRect();
+        const screenX = (event.clientX - rect.left) * (window.innerWidth / (rect.width || window.innerWidth));
+        const screenY = (event.clientY - rect.top) * (window.innerHeight / (rect.height || window.innerHeight));
+        const point = screenToMapWorld(screenX, screenY, view);
+        if (!point.inside) return;
+        event.preventDefault();
+        event.stopPropagation();
+        if (!isMapExpanded) {
+          if (event.button === undefined || event.button === 0) toggleMapExpand();
+          return;
+        }
+        if (event.button === 2) clearMapPing();
+        else setMapPing(point.x, point.y);
+      }
+
       function toggleMapExpand() {
         isMapExpanded = !isMapExpanded;
         const btn = document.getElementById('btn-expand-map');
-        if (btn) btn.textContent = isMapExpanded ? '🗺️ Close' : '🗺️ Expand';
+        if (btn) {
+          btn.textContent = isMapExpanded ? '🗺️ Close' : '🗺️ Map';
+          btn.setAttribute('aria-expanded', String(isMapExpanded));
+          btn.setAttribute('aria-label', isMapExpanded ? 'Close island map' : 'Expand island map');
+        }
+        const help = document.getElementById('map-help');
+        if (help) help.classList.toggle('hidden', !isMapExpanded);
         const jZone = document.getElementById('joystick-zone');
         const aBtns = document.getElementById('action-buttons');
         if (jZone) jZone.style.display = isMapExpanded ? 'none' : 'block';
         if (aBtns) aBtns.style.display = isMapExpanded ? 'none' : 'block';
+        getMinimapLayout();
       }
 
       function getBotSkill() {
@@ -2741,6 +2924,16 @@
           if (transition) transition.classList.remove('active');
           const toast = byId('toast-msg');
           if (toast) toast.classList.remove('show');
+          for (const id of ['waypoint-hud', 'map-help']) {
+            const element = byId(id);
+            if (element) element.classList.add('hidden');
+          }
+          const mapButton = byId('btn-expand-map');
+          if (mapButton) { mapButton.textContent = '🗺️ Map'; mapButton.setAttribute('aria-expanded', 'false'); }
+          const joystick = byId('joystick-zone');
+          if (joystick) joystick.style.display = 'block';
+          const actions = byId('action-buttons');
+          if (actions) actions.style.display = 'block';
 
           const htmlContent = '<!DOCTYPE html>\n' + clone.outerHTML;
           const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
@@ -3528,6 +3721,18 @@
         buttonPointerIds: {},
 
         init() {
+          CANVAS.addEventListener('pointerdown', handleMinimapPointer);
+          CANVAS.addEventListener('contextmenu', event => {
+            if (!isMapExpanded) return;
+            const view = getMinimapLayout();
+            const rect = CANVAS.getBoundingClientRect();
+            const screenX = (event.clientX - rect.left) * (window.innerWidth / (rect.width || window.innerWidth));
+            const screenY = (event.clientY - rect.top) * (window.innerHeight / (rect.height || window.innerHeight));
+            if (screenToMapWorld(screenX, screenY, view).inside) {
+              event.preventDefault();
+              clearMapPing();
+            }
+          });
           const zone = document.getElementById('joystick-zone');
           const stick = document.getElementById('joystick-stick');
           const updateCenter = () => {
@@ -3613,7 +3818,7 @@
           this.bindButton('btn-dash', 'dash', () => Game.playerAction('dash'));
 
           const movementCodes = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
-          const actionCodes = new Set(['Space', 'KeyJ', 'KeyE', 'KeyK', 'ShiftLeft', 'ShiftRight', 'KeyL', 'KeyQ', 'KeyR', 'KeyM', 'KeyZ', 'KeyP', 'Escape']);
+          const actionCodes = new Set(['Space', 'KeyJ', 'KeyE', 'KeyK', 'ShiftLeft', 'ShiftRight', 'KeyL', 'KeyQ', 'KeyR', 'KeyM', 'KeyZ', 'KeyG', 'KeyC', 'KeyP', 'Escape']);
           window.addEventListener('keydown', event => {
             const target = event.target;
             if (event.code === 'Escape' && !event.repeat) {
@@ -3645,6 +3850,14 @@
             }
             if (event.code === 'KeyZ') {
               if (!event.repeat) toggleZoom();
+              return;
+            }
+            if (event.code === 'KeyG') {
+              if (!event.repeat) pingAtAim();
+              return;
+            }
+            if (event.code === 'KeyC') {
+              if (!event.repeat) clearMapPing();
               return;
             }
             if (Game.state !== 'PLAYING') return;
@@ -5165,6 +5378,7 @@
           UI_ELEMENTS.stormTint.classList.remove('active');
           UI_ELEMENTS.artBanner.classList.remove('show');
           if (isMapExpanded) toggleMapExpand();
+          clearMapPing(true);
 
           for (let i = 0; i < MAX_PROJECTILES; i++) projectilePool[i].active = false;
           for (let i = 0; i < MAX_PARTICLES; i++) particlePool[i].active = false;
@@ -5434,6 +5648,8 @@
             Camera.update(this.storm.currentCenterX, this.storm.currentCenterY, deltaTime);
           }
 
+          updateWaypointProgress();
+
           // FIX 5: Throttled HUD update (10Hz)
           if (this.time - lastHudUpdate >= 0.1) {
             lastHudUpdate = this.time;
@@ -5539,6 +5755,7 @@
           if (isVictory) PlayerData.totalWins++;
           PlayerData.totalKills += kills;
           flushPlayerSave();
+          clearMapPing(true);
           Input.reset();
 
           UIController.showGameOver(isVictory, placement, this.player, earnedGold, earnedGems, kills, earnedXp, didLevelUp);
@@ -5551,6 +5768,82 @@
         let t = ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / l2;
         t = Math.max(0, Math.min(1, t));
         return Math.hypot(px - (x1 + t * (x2 - x1)), py - (y1 + t * (y2 - y1)));
+      }
+
+      function drawWaypointBeacon(ctx) {
+        if (!activePing) return;
+        const pulse = PlayerData.reducedMotion ? 0 : Math.sin(performance.now() / 180) * 5;
+        const distance = Game.player ? Math.hypot(Game.player.x - activePing.x, Game.player.y - activePing.y) : 0;
+        ctx.save();
+        ctx.translate(activePing.x, activePing.y);
+        ctx.strokeStyle = '#67e8f9';
+        ctx.fillStyle = 'rgba(8, 145, 178, 0.18)';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#06b6d4';
+        ctx.shadowBlur = 14;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 30 + pulse, 18 + pulse * 0.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.setLineDash([8, 8]);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -125);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = '#22d3ee';
+        ctx.fillRect(-11, -136, 22, 22);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-11, -136, 22, 22);
+        ctx.rotate(-Math.PI / 4);
+        ctx.shadowBlur = 4;
+        ctx.fillStyle = '#ecfeff';
+        ctx.font = '800 13px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`📍 ${activePing.label} · ${formatWorldDistance(distance)}`, 0, -154);
+        ctx.restore();
+      }
+
+      function drawWaypointEdgeIndicator() {
+        if (!activePing || isMapExpanded || !Game.player ||
+            (Game.state !== 'PLAYING' && Game.state !== 'DROPPING')) return;
+        const zoom = Camera.getZoom();
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        const targetX = centerX + (activePing.x - Camera.x) * zoom;
+        const targetY = centerY + (activePing.y - Camera.y) * zoom * CAMERA_PITCH;
+        const margin = 62;
+        if (targetX >= margin && targetX <= window.innerWidth - margin && targetY >= margin && targetY <= window.innerHeight - margin) return;
+        const angle = Math.atan2(targetY - centerY, targetX - centerX);
+        const radius = Math.min(window.innerWidth, window.innerHeight) * 0.36;
+        const x = Math.max(margin, Math.min(window.innerWidth - margin, centerX + Math.cos(angle) * radius));
+        const y = Math.max(margin, Math.min(window.innerHeight - margin, centerY + Math.sin(angle) * radius));
+        const distance = Math.hypot(Game.player.x - activePing.x, Game.player.y - activePing.y);
+        CTX.save();
+        CTX.translate(x, y);
+        CTX.fillStyle = 'rgba(4, 18, 29, 0.88)';
+        CTX.strokeStyle = '#67e8f9';
+        CTX.lineWidth = 2;
+        CTX.beginPath();
+        CTX.arc(0, 0, 23, 0, Math.PI * 2);
+        CTX.fill();
+        CTX.stroke();
+        CTX.rotate(angle);
+        CTX.fillStyle = '#22d3ee';
+        CTX.beginPath();
+        CTX.moveTo(13, 0);
+        CTX.lineTo(-7, -8);
+        CTX.lineTo(-7, 8);
+        CTX.closePath();
+        CTX.fill();
+        CTX.rotate(-angle);
+        CTX.fillStyle = '#ecfeff';
+        CTX.font = '800 11px system-ui, sans-serif';
+        CTX.textAlign = 'center';
+        CTX.fillText(formatWorldDistance(distance), 0, 38);
+        CTX.restore();
       }
 
       // ==========================================
@@ -5877,6 +6170,9 @@
           if (entity.x < viewLeft || entity.x > viewRight || entity.y < viewTop || entity.y > viewBottom) continue;
           entity.draw(CTX);
         }
+        if (activePing && activePing.x >= viewLeft && activePing.x <= viewRight && activePing.y >= viewTop && activePing.y <= viewBottom) {
+          drawWaypointBeacon(CTX);
+        }
 
         // LAYER 5: Floating Damage Numbers
         CTX.font = 'bold 14px system-ui, sans-serif';
@@ -5894,6 +6190,7 @@
         }
 
         Camera.restore(CTX);
+        drawWaypointEdgeIndicator();
 
         // Section 5: Aiming Line Indicator (Screen space)
         if (isAiming && Game.state === "PLAYING" && !PlayerData.autoAimEnabled) {
@@ -5926,44 +6223,30 @@
         // PART 3: MINIMAP (Screen-space Canvas HUD - Section 7)
         // ==========================================
         if (Game.state === "PLAYING" || Game.state === "DROPPING") {
-          let mapSize, mapX, mapY;
+          const mapView = getMinimapLayout();
+          const mapSize = mapView.size;
+          const mapX = mapView.x;
+          const mapY = mapView.y;
           if (isMapExpanded) {
-            mapSize = window.innerHeight * 0.9;
-            mapX = (window.innerWidth - mapSize) / 2;
-            mapY = (window.innerHeight - mapSize) / 2;
-
-            // Dark backdrop behind expanded map
             CTX.save();
-            CTX.fillStyle = 'rgba(2, 6, 23, 0.85)';
+            CTX.fillStyle = 'rgba(2, 6, 23, 0.88)';
             CTX.fillRect(0, 0, window.innerWidth, window.innerHeight);
             CTX.restore();
-          } else {
-            mapSize = Math.min(105, Math.floor(window.innerHeight * 0.28));
-            mapX = 14;
-            mapY = 90;
           }
 
           CTX.save();
-          CTX.globalAlpha = isMapExpanded ? 0.95 : 0.75;
+          CTX.globalAlpha = isMapExpanded ? 1 : 0.94;
           
           // Dark background square with glassmorphism feel
           CTX.fillStyle = 'rgba(15, 23, 42, 0.9)';
           CTX.fillRect(mapX, mapY, mapSize, mapSize);
-          
-          // Neon purple border
-          CTX.strokeStyle = '#a855f7';
-          CTX.lineWidth = isMapExpanded ? 2.5 : 1.5;
-          CTX.shadowColor = '#a855f7';
-          CTX.shadowBlur = isMapExpanded ? 12 : 6;
-          CTX.strokeRect(mapX, mapY, mapSize, mapSize);
-          CTX.shadowBlur = 0;
           
           // Clip strictly inside minimap boundaries
           CTX.beginPath();
           CTX.rect(mapX, mapY, mapSize, mapSize);
           CTX.clip();
 
-          const scale = mapSize / ARENA_WIDTH;
+          const scale = mapView.scale;
 
           const mapImage = AssetLoader.getMap();
           if (mapImage) {
@@ -6006,20 +6289,48 @@
           }
           CTX.stroke();
 
-          // Storm safe zone (purple circle)
+          // Purple shading is OUTSIDE the safe zone; cyan dashed ring previews its target radius.
           if (Game.storm && Game.state !== 'DROPPING') {
             const stormX = mapX + Game.storm.currentCenterX * scale;
             const stormY = mapY + Game.storm.currentCenterY * scale;
             const stormR = Math.max(0, Game.storm.currentRadius * scale);
-            
+            CTX.save();
+            CTX.beginPath();
+            CTX.rect(mapX, mapY, mapSize, mapSize);
+            CTX.arc(stormX, stormY, stormR, 0, Math.PI * 2, true);
+            CTX.fillStyle = 'rgba(88, 28, 135, 0.38)';
+            CTX.fill();
             CTX.beginPath();
             CTX.arc(stormX, stormY, stormR, 0, Math.PI * 2);
-            CTX.strokeStyle = '#c084fc';
-            CTX.lineWidth = 1.5;
+            CTX.strokeStyle = '#e9d5ff';
+            CTX.lineWidth = isMapExpanded ? 2 : 1.2;
             CTX.stroke();
-            
-            CTX.fillStyle = 'rgba(168, 85, 247, 0.12)';
-            CTX.fill();
+            if (Game.storm.targetRadius < Game.storm.currentRadius - 50) {
+              CTX.beginPath();
+              CTX.arc(stormX, stormY, Math.max(0, Game.storm.targetRadius * scale), 0, Math.PI * 2);
+              CTX.strokeStyle = '#67e8f9';
+              CTX.lineWidth = isMapExpanded ? 1.8 : 1;
+              CTX.setLineDash(isMapExpanded ? [7, 5] : [3, 3]);
+              CTX.stroke();
+              CTX.setLineDash([]);
+            }
+            CTX.restore();
+          }
+
+          if (isMapExpanded) {
+            CTX.save();
+            CTX.font = `800 ${Math.max(9, Math.min(12, mapSize / 48))}px system-ui, sans-serif`;
+            CTX.textAlign = 'center';
+            CTX.textBaseline = 'middle';
+            CTX.shadowColor = 'rgba(0,0,0,0.95)';
+            CTX.shadowBlur = 4;
+            for (const region of MAP_REGIONS) {
+              const rx = mapX + region.x * mapSize;
+              const ry = mapY + region.y * mapSize;
+              CTX.fillStyle = 'rgba(255,255,255,0.92)';
+              CTX.fillText(region.label, rx, ry);
+            }
+            CTX.restore();
           }
 
           // Entities: Distinct Class Icons for Bots & Gold for Player
@@ -6030,12 +6341,22 @@
             const ey = mapY + ent.y * scale;
             CTX.beginPath();
             if (ent.isPlayer) {
-              CTX.arc(ex, ey, 3.8, 0, Math.PI * 2);
+              const arrowSize = isMapExpanded ? 7 : 4.8;
+              CTX.save();
+              CTX.translate(ex, ey);
+              CTX.rotate(ent.facingAngle || 0);
+              CTX.beginPath();
+              CTX.moveTo(arrowSize * 1.45, 0);
+              CTX.lineTo(-arrowSize, -arrowSize * 0.82);
+              CTX.lineTo(-arrowSize * 0.45, 0);
+              CTX.lineTo(-arrowSize, arrowSize * 0.82);
+              CTX.closePath();
               CTX.fillStyle = '#fbbf24';
               CTX.fill();
               CTX.strokeStyle = '#ffffff';
-              CTX.lineWidth = 1.2;
+              CTX.lineWidth = isMapExpanded ? 1.8 : 1.2;
               CTX.stroke();
+              CTX.restore();
             } else if (ent.charKey === 'BERSERKER') {
               const r = 3.2;
               CTX.moveTo(ex, ey - r);
@@ -6056,6 +6377,53 @@
             }
           }
 
+          if (activePing) {
+            const pingPoint = worldToMapScreen(activePing.x, activePing.y, mapView);
+            if (isMapExpanded && Game.player && Game.player.isAlive) {
+              const playerPoint = worldToMapScreen(Game.player.x, Game.player.y, mapView);
+              CTX.save();
+              CTX.strokeStyle = 'rgba(103,232,249,0.72)';
+              CTX.lineWidth = 1.6;
+              CTX.setLineDash([6, 5]);
+              CTX.beginPath();
+              CTX.moveTo(playerPoint.x, playerPoint.y);
+              CTX.lineTo(pingPoint.x, pingPoint.y);
+              CTX.stroke();
+              CTX.restore();
+            }
+            const pulse = PlayerData.reducedMotion ? 0 : Math.sin(performance.now() / 170) * (isMapExpanded ? 4 : 2);
+            const pinRadius = (isMapExpanded ? 8 : 5) + pulse;
+            CTX.save();
+            CTX.strokeStyle = '#67e8f9';
+            CTX.fillStyle = '#22d3ee';
+            CTX.shadowColor = '#06b6d4';
+            CTX.shadowBlur = isMapExpanded ? 14 : 7;
+            CTX.lineWidth = isMapExpanded ? 2.5 : 1.5;
+            CTX.beginPath();
+            CTX.arc(pingPoint.x, pingPoint.y, Math.max(3, pinRadius + 5), 0, Math.PI * 2);
+            CTX.stroke();
+            CTX.translate(pingPoint.x, pingPoint.y);
+            CTX.rotate(Math.PI / 4);
+            CTX.fillRect(-5, -5, 10, 10);
+            CTX.strokeStyle = '#ffffff';
+            CTX.strokeRect(-5, -5, 10, 10);
+            CTX.restore();
+          }
+
+          CTX.restore();
+          CTX.save();
+          CTX.strokeStyle = isMapExpanded ? '#67e8f9' : '#a855f7';
+          CTX.lineWidth = isMapExpanded ? 2.5 : 1.5;
+          CTX.shadowColor = CTX.strokeStyle;
+          CTX.shadowBlur = isMapExpanded ? 12 : 6;
+          CTX.strokeRect(mapX, mapY, mapSize, mapSize);
+          if (!isMapExpanded && Game.player) {
+            CTX.shadowBlur = 3;
+            CTX.fillStyle = '#e2e8f0';
+            CTX.font = '800 9px system-ui, sans-serif';
+            CTX.textAlign = 'left';
+            CTX.fillText(getRegionName(Game.player.x, Game.player.y).toUpperCase(), mapX, mapY + mapSize + 13);
+          }
           CTX.restore();
         }
 
@@ -6514,6 +6882,7 @@
       function returnToLobby(fromMatch = false) {
         if (fromMatch && !window.confirm('Leave this match and return to the lobby? Match rewards are only granted on elimination or victory.')) return;
         if (isMapExpanded) toggleMapExpand();
+        clearMapPing(true);
         Input.reset();
         transitionTo(() => {
           if (fromMatch) Game.matchFinished = true;
@@ -6917,6 +7286,7 @@
         manaTrack.setAttribute('aria-valuenow', String(Math.max(0, Math.floor(p.mana))));
         document.getElementById('hud-kills').textContent = p.kills;
         document.getElementById('hud-alive-compact').textContent = Game.aliveCount;
+        updateWaypointHUD();
 
         if (UI_ELEMENTS.aliveBadge) UI_ELEMENTS.aliveBadge.textContent = '⚔️ ' + Game.aliveCount + ' ALIVE';
 
@@ -7134,7 +7504,7 @@
         "Dash grants brief invulnerability and leaps over low obstacles",
         "Pick up gems to unlock new fighters",
         "Each fighter has a unique ultimate ability",
-        "Press M to expand the map and Esc to pause"
+        "M opens the map · tap to ping · G pings ahead · C clears"
       ];
       let tipIndex = 0;
       const tipInterval = setInterval(() => {
